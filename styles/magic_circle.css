@@ -120,20 +120,45 @@ footer {
 		background-repeat: no-repeat;
 	}
 	#room .stats {
-		padding: 1em;
+		padding: 1em 2em;
 		top: 5%;
 		right: 5%;
-		background-color: rgba(255,255,255,0.1);
-		border-radius: 2em;
+		background-color: rgba(255,255,255,0.2);
+		border-radius: 5em;
+		text-align: center;
+		box-shadow: 0 1em 0.5em rgba(0,0,0,0.1);
 	}
 	#room .stats > span {
 		display: block;
 
 	}
 
-.currency-val {
-	font-size: 200%;
-}
+	.forbiddenKnowledgeLabel, 
+	#forbiddenKnowledge {
+		color: #434;
+	}
+	.sanityLabel,
+	#sanity {
+		display: inline-block;
+		color: #343;
+		margin-top: 1em;
+	}
+	.currency-val {
+		font-size: 250%;
+	}
+	.currency-out-of {
+		display: inline-block;
+		font-size: 150%;
+		margin: 0 0.5em;
+	}
+	.currency-max {
+		font-size: 150%;
+	}
+	.currency-rate {
+		font-size: 200%;
+	}
+
+
 .wall {
 	top: 0;
 	left: 0;
@@ -177,14 +202,28 @@ footer {
 	width: 400px;
 	/* background-color: rgba(0,0,0,0.1); */
 	cursor: pointer;
+	transition: 1s all ease-in-out;
   	transform: rotateX(-20deg) rotateY(32deg);
 }
+	#monster[data-cycle="0"] {
+		
+	}
+	#monster[data-cycle="1"] {
+		transform: rotateX(-19deg) rotateY(30deg) translateY(0px);
+	}
+	#monster[data-cycle="2"] {
+		transform: rotateX(-18deg) rotateY(30deg) translateY(20px);
+	}
+	#monster[data-cycle="3"] {
+		transform: rotateX(-19deg) rotateY(31deg) translateY(-10px);
+	}
 	#monster:hover {
 		transform: rotateX(-20deg) rotateY(0deg);
 	}
 	#monster:active {
 		transform: rotateX(0deg) rotateY(0deg);
 	}
+
 #cultist {
 	bottom: 0px;
 	right: 0;
@@ -269,6 +308,17 @@ ol.inc {
 	float: left;
 }
 
+ol.inc .cannotAfford button {
+	background-color: rgba(0,0,0,0.2);
+	box-shadow: none;
+}
+
+button.summon,
+button.banish,
+ol.inc button.summon,
+ol.inc button.banish {
+	background-color: rgba(10,0,20,0.4);;
+}
 .conjured {
-	color: #633;
+	color: #436;
 }

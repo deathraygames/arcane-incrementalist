@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>LD37</title>
+	<title>Arcane Incrementalist</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="styles/tabs.css" />
 	<link rel="stylesheet" href="styles/magic_circle.css" />
@@ -12,7 +12,7 @@
 <body>
 
 <header>
-	<h1>Arcane Incrementalist<span class="version">v0.5.0</span></h1>
+	<h1>Arcane Incrementalist<span class="version">v0.5.1</span></h1>
 </header>
 
 <div id="booting-up-rocket-boots">
@@ -41,9 +41,9 @@
 		<div id="extras">
 		</div>
 		<div class="stats">
-			<span>Forbidden Knowledge:</span>
+			<span class="forbiddenKnowledgeLabel">Forbidden Knowledge:</span>
 			<span id="forbiddenKnowledge"></span>
-			<span>Sanity:</span>
+			<span class="sanityLabel">Sanity:</span>
 			<span id="sanity"></span>
 		</div>		
 	</section>
@@ -51,7 +51,7 @@
 		<ol>
 			<li><a href="#monsters" class="monsters">Conjure</a></li
 			><li><a href="#grimoires" class="grimoires">Grimoires</a><!--</li
-			><li><a href="#extras" class="extras">Extras</a></li
+			><li><a href="#extras" class="extras">Foci</a></li
 			><li><a href="#info" class="info">Info</a></li>-->
 		</ol>
 	</section>
@@ -94,8 +94,11 @@
 		<br />
 		Uses the RocketBoots web game kit, jQuery, Lodash, Mustache, Google Fonts, and a few images from Wikimedia Commons;
 		everything else is original and &copy; 2016.
-		<br />
-		Code is open source, released under the MIT license, and available on GitHub.
+	</p>
+	<p class="remix">
+		Code is open source, released under the MIT license, and 
+		<a href="https://github.com/deathraygames/arcane-incrementalist" target="_blank">available on GitHub</a>.
+		Artwork is licensed under <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License BY-SA" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png" /></a>
 	</p>
 	<p>
 		<a href="https://iamdivider.bandcamp.com/album/warp-and-weft" target="_blank">
@@ -118,7 +121,7 @@
 		
 	</script>
 	<script type="text/template" id="monstersTemplate">
-		<li data-index="{{index}}" class="{{lockedClass}}">
+		<li data-index="{{index}}" class="{{lockedClass}} {{affordClass}}">
 			<span class="count"></span>
 			<span class="displayName">{{displayName}}</span>
 			{{#isConjured}}
@@ -137,7 +140,7 @@
 		</li>
 	</script>
 	<script type="text/template" id="grimoiresTemplate">
-		<li data-index="{{index}}" class="{{lockedClass}}">
+		<li data-index="{{index}}" class="{{lockedClass}} {{affordClass}}">
 			<span class="count">{{count}}</span>
 			<span class="displayName">{{displayName}}</span>
 
@@ -149,7 +152,7 @@
 		</li>
 	</script>
 	<script type="text/template" id="extrasTemplate">
-		<li data-index="{{index}}" class="{{lockedClass}}">
+		<li data-index="{{index}}" class="{{lockedClass}} {{affordClass}}">
 			<span class="count">{{count}}</span>
 			<span class="displayName">{{displayName}}</span>
 			{{#cost}}

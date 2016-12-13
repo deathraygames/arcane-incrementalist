@@ -27,8 +27,9 @@
 
 		//this.hasCalculations = (options.calcRate || options.calcValue || options.calcMax) ? true : false;
 		this.calcRate 	= (options.calcRate || undefined);
-		this.calcValue 	= (options.calcValue || undefined);
+		this.calcValue 	= (options.calcValue || options.calcVal || undefined);
 		this.calcMax 	= (options.calcMax || undefined);
+		this.calcVal = this.calcValue; // alias
 
 		if (typeof options.element === "object") {
 			this.element	= options.element;	

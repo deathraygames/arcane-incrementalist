@@ -1,10 +1,8 @@
 RocketBoots.loadComponents([
-	"Coords", // Requirements don't work perfect yet, so need to bring this in
 	"StateMachine",
-	"Dice",
 	"Loop",
 	"Incrementer",
-	"World"
+	"Tabs"
 ])
 /* .loadCustomComponents([
 	"Node"
@@ -14,16 +12,19 @@ RocketBoots.loadComponents([
 ////===== Game, Loop, States
 
 	window.g = new RocketBoots.Game({
-		name: "LD37",
+		name: "Arcane Incrementalist",
 		instantiateComponents: [
 			//{"state": "StateMachine"},
 			{"loop": "Loop"},
-			{"dice": "Dice"},
-			{"incrementer": "Incrementer"}
+			{"incrementer": "Incrementer"},
+			{"tabs": "Tabs"}
 		]
 	});
 
 	g.$insaneElts = $('#game').add('#cultist');
+	g.$monster = $('#monster');
+	g.monsterCycle = 0;
+	g.MAX_MONSTER_CYCLE = 5;
 
 	g.loop.set(function(){
 		g.incrementer.incrementByElapsedTime(undefined, true);
@@ -36,6 +37,12 @@ RocketBoots.loadComponents([
 		} else {
 			g.$insaneElts.removeClass("insane");
 		}
+		g.monsterCycle++;
+		if (g.monsterCycle > g.MAX_MONSTER_CYCLE) {
+			g.monsterCycle = 0;
+		}
+		g.$monster.attr('data-cycle', g.monsterCycle);
+
 	});
 
 	g.state.addStates({
@@ -95,18 +102,24 @@ RocketBoots.loadComponents([
 					var sanityRate = g.getSummonedMonster().sanityRate;
 					if (c.forbiddenKnowledge.val >= c.forbiddenKnowledge.max 
 						&& c.forbiddenKnowledge.rate > 0) {
-						sanityRate -= c.forbiddenKnowledge.rate;
+						sanityRate -= Math.round(c.forbiddenKnowledge.rate / 2);
 					}
 					return sanityRate;
 				} else {
-					return 2;
+					return c.sanityRecovery.val;
 				}
-				
 			},
 			calcMax: function(c){
 				var max = 90;
 				max += (10 * _.reduce(g.data.monsters, function(sum, n){ return sum + n; }));
 				return max;
+			}
+		},{
+			name: "sanityRecovery",
+			displayName: "Sanity Recovery Rate",
+			tip: "",
+			calcVal: function(c){
+				return 3;
 			}
 		}
 	]);
@@ -167,7 +180,7 @@ RocketBoots.loadComponents([
 	];
 
 	g.getMonster = function (index) {
-		var fkRate = ( Math.pow((index), 2) * 10 ) + ((index === 0) ? 1 : 0);
+		var fkRate = ( Math.pow((index), 2) * 10 ) + ((index === 0) ? 2 : 0);
 		var count = g.data.monsters[index];
 		var cost = Math.round( Math.pow(fkRate, 1.25) / 10 ) * 100;
 		var canAfford = (g.incrementer.currencies.forbiddenKnowledge.val >= cost);
@@ -181,7 +194,8 @@ RocketBoots.loadComponents([
 			cost: 					cost,
 			isConjured: 			((index === g.data.summonedMonsterIndex) ? true : false),
 			count: 					count,
-			isLocked: 				(!canAfford && g.data.monsters[index] == 0)
+			isLocked: 				(!canAfford && g.data.monsters[index] == 0),
+			canAfford: 				canAfford
 		};
 		if (monster.count > 0) {
 			monster.cost = null;
@@ -263,7 +277,8 @@ RocketBoots.loadComponents([
 			forbiddenKnowledgeMax: 	fkMax,
 			cost: 					cost,
 			count: 					count,
-			isLocked: 				(!canAfford)
+			isLocked: 				(count == 0),
+			canAfford: 				(canAfford)
 		};
 		return book;
 	};
@@ -279,8 +294,14 @@ RocketBoots.loadComponents([
 	// EXTRAS
 
 	g.extraNames = [
+		"Candles",
 		"Mandrake", 
-		"Hand of Glory"
+		"Calming Incense",
+		"Ritual Dagger",
+		"Wand",
+		"Staff",
+		"Hand of Glory",
+		"Crystal Ball"
 	];
 
 	g.getExtra = function (index) {
@@ -315,7 +336,7 @@ RocketBoots.loadComponents([
 			fk.subtract(cost);
 			g.data[listName][index] += 1;
 		} else {
-			g.alert("Cannot afford this.");
+			g.alert("Cannot afford this. You need more forbidden knowledge.");
 		}
 		g.lists.update();
 	};
@@ -408,6 +429,7 @@ RocketBoots.loadComponents([
 			var list = g.getList(listName);
 			_.forEach(list, function(item){
 				item.lockedClass = ((item.isLocked) ? "locked" : "unlocked");
+				item.affordClass = ((item.canAfford) ? "afford" : "cannotAfford");
 				html += Mustache.render(template, item);
 			});
 			$('.' + listName + ' ol').html(html);
@@ -419,62 +441,6 @@ RocketBoots.loadComponents([
 		this.write();
 	};
 
-////===== User Interface - Tabs
-
-	g.tabs = {
-		containerSelector: 		'.tabs',
-		contentSelector: 		'.tabs > div',
-		navContainerSelector: 	'.nav > ol',
-		navClickableSelector: 	'a',
-		navSelector: 			null, 
-		selectedClass: 			'selected',
-		$nav: 					null,
-		$content: 				null,
-		showWithJQuery: 		false
-	};
-
-	g.tabs.setup = function() {	
-		var tabs = this;
-		tabs.$content = $(tabs.contentSelector);
-		tabs.navSelector = tabs.navContainerSelector + ' ' + tabs.navClickableSelector;
-		tabs.$nav = $(tabs.navSelector);
-
-		$(tabs.navContainerSelector).off("click").on("click", tabs.navClickableSelector, function(e){
-			var $clicked = $(e.target);
-			var goTo = $clicked.data("goto");
-			if (typeof goTo === 'undefined') {
-				var href = $clicked.attr("href");
-				if (typeof href !== 'undefined') {
-					goTo = href.split('#')[1];
-				}
-			}
-			tabs.select(goTo, $clicked);
-		});
-
-		if (tabs.showWithJQuery) {
-			tabs.$content.hide();
-		}
-
-		return tabs;
-	};
-
-	g.tabs.select = function(goToClass, $selectedNav) {
-		var tabs = this;
-		var $selected = tabs.$content.filter('.' + goToClass);
-		var $notSelected = tabs.$content.not($selected);
-		if (typeof $selectedNav === 'undefined') {
-			$selectedNav = tabs.$nav.filter('.'+ goToClass);
-		}
-		// Remove selected class from tab content and tab links
-		$notSelected.add(tabs.$nav).not($selectedNav).removeClass(tabs.selectedClass);
-		// Add selected class
-		$selected.add($selectedNav).addClass(tabs.selectedClass);
-		if (tabs.showWithJQuery) {
-			$selected.show();
-			$notSelected.hide();
-		}
-		return tabs;
-	};
 
 ////===== Start it up
 
