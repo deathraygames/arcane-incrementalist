@@ -10,12 +10,17 @@
 	margin: 0;
 	display: inline-block;
 	box-sizing: border-box;
-	width: 25%;	
+	max-width: 25%;	
+	min-width: 5em;
+}
+.nav > ol > li.close {
+	min-width: 1em;
 }
 .nav > ol a {
-	display: inline-block;
+	display: block;
+	box-sizing: border-box;
 	width: 100%;
-	padding: 1em 0;
+	padding: 1em 1em;
 }
 	.nav > ol a.selected {
 		background-color: rgba(255,255,255,0.3);

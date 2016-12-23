@@ -74,7 +74,7 @@ RocketBoots.loadComponents([
 			tip: "",
 			calcRate: function(c){
 				if (c.sanity.val === 0) {
-					return -1000;
+					return g.getSummonedMonster().sanityRate;
 				//} else if (c.forbiddenKnowledge.val >= c.forbiddenKnowledge.max) {
 				//	return 0;
 				} else if (g.hasSummonedMonster()) {
@@ -99,10 +99,11 @@ RocketBoots.loadComponents([
 			tip: "",
 			calcRate: function(c){
 				if (g.hasSummonedMonster()) {
-					var sanityRate = g.getSummonedMonster().sanityRate;
+					var sanityRate = 0;
 					if (c.forbiddenKnowledge.val >= c.forbiddenKnowledge.max 
 						&& c.forbiddenKnowledge.rate > 0) {
-						sanityRate -= Math.round(c.forbiddenKnowledge.rate / 2);
+						sanityRate = g.getSummonedMonster().sanityRate;
+						//sanityRate -= Math.round(c.forbiddenKnowledge.rate / 2);
 					}
 					return sanityRate;
 				} else {
@@ -112,6 +113,10 @@ RocketBoots.loadComponents([
 			calcMax: function(c){
 				var max = 90;
 				max += (10 * _.reduce(g.data.monsters, function(sum, n){ return sum + n; }));
+				_.forEach(g.extraNames, function(value, i){
+					var extra = g.getExtra(i);
+					max += (extra.sanityMax * extra.count);
+				});
 				return max;
 			}
 		},{
@@ -189,7 +194,7 @@ RocketBoots.loadComponents([
 			index: 					index,
 			displayName: 			g.monsterNames[index],
 			forbiddenKnowledgeRate: fkRate,
-			sanityRate: 			(-1 * index),
+			sanityRate: 			(-1 * (index + 1)),
 			risk: 					risk,
 			cost: 					cost,
 			isConjured: 			((index === g.data.summonedMonsterIndex) ? true : false),
@@ -266,7 +271,7 @@ RocketBoots.loadComponents([
 		var count = g.data.grimoires[index];
 		var cost = Math.round((
 			(Math.pow((index + 1), 2.1) * 10)
-			+ (index * 2) 
+			+ (index * 1.5) 
 			+ Math.pow(count, 2)
 		)/10) * 20;
 		var canAfford = (g.incrementer.currencies.forbiddenKnowledge.val >= cost);
@@ -305,15 +310,21 @@ RocketBoots.loadComponents([
 	];
 
 	g.getExtra = function (index) {
-		var cost = (100 * index);
+		var power = Math.round( (index + 1) * 20 );
+		var count = g.data.extras[index];
+		var cost = Math.round(( 
+			(100 * (index + 1))
+			+ Math.pow((count + 1), 3)
+		)/10) * 10;
 		var canAfford = (g.incrementer.currencies.forbiddenKnowledge.val >= cost);
 		var extra = {
 			index: 					index,
 			displayName: 			g.extraNames[index],
-			//cost: 					,
+			cost: 					cost,
 			count: 					g.data.extras[index],
-			isLocked: 				(!canAfford),
-			
+			isLocked: 				(count == 0),
+			canAfford: 				canAfford,
+			sanityMax: 				power
 		};
 		return extra;
 	};
@@ -413,10 +424,10 @@ RocketBoots.loadComponents([
 			});
 
 			$('#circle').click(function(){
-				g.tabs.select('monsters');
+				g.tabs.open().select('monsters');
 			});
 			$('#cultist').click(function(){
-				g.tabs.select('grimoires');
+				g.tabs.open().select('grimoires');
 			});
 		});
 		return this;
@@ -448,7 +459,7 @@ RocketBoots.loadComponents([
 	g.state.transition("game");
 	g.setupListData();
 	g.lists.setup();
-	g.tabs.setup();
+	g.tabs.setup({containerSelector: '.controls'}).close();
 
 	// INTRO
 
