@@ -7,19 +7,8 @@
 		credits:		"By Luke Nickerson, 2016"
 	};
 
-	var Tabs = component.Tabs = function WorldClass (options){
-		var defaults = {
-			containerSelector: 		'.tabs',
-			contentSelector: 		'.tabs > div',
-			navContainerSelector: 	'.nav > ol',
-			navClickableSelector: 	'a',
-			navSelector: 			null, 
-			selectedClass: 			'selected',
-			$nav: 					null,
-			$content: 				null,
-			showWithJQuery: 		false
-		};
-		$.extend(this, options, defaults);
+	var Tabs = component.Tabs = function TabsClass (options){
+		this.setOptions();
 	};
 
 	/* EXAMPLE HTML:
@@ -73,22 +62,35 @@
 			}
 	*/
 
-	Tabs.prototype.setup = function() {	
+	Tabs.prototype.setOptions = function (options) {
+		var defaults = {
+			containerSelector: 		'.tabs-container',
+			tabsContainerSelector: 	'.tabs',
+			tabsContentSelector: 	'.tabs > div',
+			navContainerSelector: 	'.nav > ol',
+			navClickableSelector: 	'a',
+			navSelector: 			null, 
+			selectedClass: 			'selected',
+			$nav: 					null,
+			$content: 				null,
+			showWithJQuery: 		false,
+			closeClass: 			'close'
+		};
+		$.extend(this, defaults, options);
+		return this;	
+	};
+
+	Tabs.prototype.setup = function (options) {	
 		var tabs = this;
-		tabs.$content = $(tabs.contentSelector);
+		if (typeof options === 'object') {
+			tabs.setOptions(options);
+		}
+		tabs.$content = $(tabs.tabsContentSelector);
 		tabs.navSelector = tabs.navContainerSelector + ' ' + tabs.navClickableSelector;
 		tabs.$nav = $(tabs.navSelector);
 
 		$(tabs.navContainerSelector).off("click").on("click", tabs.navClickableSelector, function(e){
-			var $clicked = $(e.target);
-			var goTo = $clicked.data("goto");
-			if (typeof goTo === 'undefined') {
-				var href = $clicked.attr("href");
-				if (typeof href !== 'undefined') {
-					goTo = href.split('#')[1];
-				}
-			}
-			tabs.select(goTo, $clicked);
+			tabs.selectByElement( $(e.target) );
 		});
 
 		if (tabs.showWithJQuery) {
@@ -98,20 +100,39 @@
 		return tabs;
 	};
 
+	Tabs.prototype.selectByElement = function ($elt) {
+		var tabs = this;
+		var goTo = $elt.data("goto");
+		if (typeof goTo === 'undefined') {
+			var href = $elt.attr("href");
+			if (typeof href !== 'undefined') {
+				goTo = href.split('#')[1];
+			}
+		}
+		tabs.select(goTo, $elt);
+		return tabs;	
+	};
+
 	Tabs.prototype.select = function(goToClass, $selectedNav) {
 		var tabs = this;
 		var $selected = tabs.$content.filter('.' + goToClass);
 		var $notSelected = tabs.$content.not($selected);
-		if (typeof $selectedNav === 'undefined') {
-			$selectedNav = tabs.$nav.filter('.'+ goToClass);
-		}
-		// Remove selected class from tab content and tab links
-		$notSelected.add(tabs.$nav).not($selectedNav).removeClass(tabs.selectedClass);
-		// Add selected class
-		$selected.add($selectedNav).addClass(tabs.selectedClass);
-		if (tabs.showWithJQuery) {
-			$selected.show();
-			$notSelected.hide();
+
+		if (goToClass === tabs.closeClass) {
+			this.close();
+		} else {
+
+			if (typeof $selectedNav === 'undefined') {
+				$selectedNav = tabs.$nav.filter('.'+ goToClass);
+			}
+			// Remove selected class from tab content and tab links
+			$notSelected.add(tabs.$nav).not($selectedNav).removeClass(tabs.selectedClass);
+			// Add selected class
+			$selected.add($selectedNav).addClass(tabs.selectedClass);
+			if (tabs.showWithJQuery) {
+				$selected.show();
+				$notSelected.hide();
+			}
 		}
 		return tabs;
 	};
@@ -125,4 +146,16 @@
 			window[component.classNames[i]] = component[component.classNames[i]];
 		}
 	}
+
+	Tabs.prototype.open = function () {
+		var tabs = this;
+		$(tabs.containerSelector).show();
+		return tabs;
+	};
+
+	Tabs.prototype.close = function () {
+		var tabs = this;
+		$(tabs.containerSelector).hide();
+		return tabs;
+	};
 })();
