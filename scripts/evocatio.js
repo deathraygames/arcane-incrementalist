@@ -459,7 +459,7 @@ RocketBoots.loadComponents([
 	g.state.transition("game");
 	g.setupListData();
 	g.lists.setup();
-	g.tabs.setup({containerSelector: '.controls'}).close();
+	g.tabs.setup({containerSelector: '.controls'}); // .close();
 
 	// INTRO
 
@@ -468,5 +468,4 @@ RocketBoots.loadComponents([
 	$('#cultist').fadeIn();
 	$('#circle').fadeIn(1000);
 	$('#room .stats').fadeIn(2000);
-
 });
